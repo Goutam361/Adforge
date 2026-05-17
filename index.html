@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goutam Mohanty | AI-Powered Ad Creation | Try Before You Pay</title>
+  <meta name="description" content="Goutam Mohanty — Video editor & AI ad creator. Get a free AI-generated ad demo for your brand. See real results before you invest." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ["'Instrument Serif'", "serif"],
+            body: ["'Barlow'", "sans-serif"],
+          },
+          borderRadius: { DEFAULT: "9999px" },
+        },
+      },
+    };
+  </script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;scroll-padding-top:6rem;}
+    body{background:#000;font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+    .liquid-glass{background:rgba(255,255,255,0.01);background-blend-mode:luminosity;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;box-shadow:inset 0 1px 1px rgba(255,255,255,0.1);position:relative;overflow:hidden}
+    .liquid-glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;background:linear-gradient(180deg,rgba(255,255,255,0.45) 0%,rgba(255,255,255,0.15) 20%,rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%,rgba(255,255,255,0.15) 80%,rgba(255,255,255,0.45) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+
+    .liquid-glass-strong{background:rgba(255,255,255,0.01);background-blend-mode:luminosity;backdrop-filter:blur(50px);-webkit-backdrop-filter:blur(50px);border:none;box-shadow:4px 4px 4px rgba(0,0,0,0.05),inset 0 1px 1px rgba(255,255,255,0.15);position:relative;overflow:hidden}
+    .liquid-glass-strong::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;background:linear-gradient(180deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0.2) 20%,rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%,rgba(255,255,255,0.2) 80%,rgba(255,255,255,0.5) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+
+    .anim-fade{opacity:0;filter:blur(10px);transform:translateY(20px);transition:opacity 0.8s ease-out,filter 0.8s ease-out,transform 0.8s ease-out}
+    .anim-fade.visible{opacity:1;filter:blur(0px);transform:translateY(0)}
+
+    @keyframes blurWordIn{
+      0%{filter:blur(10px);opacity:0;transform:translateY(50px)}
+      50%{filter:blur(5px);opacity:0.5;transform:translateY(-5px)}
+      100%{filter:blur(0px);opacity:1;transform:translateY(0)}
+    }
+    .blur-word{display:inline-block;opacity:0;animation:blurWordIn 0.7s ease-out forwards}
+
+    @keyframes scrollRight {
+      0% { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
+    }
+    .marquee-content { animation: scrollRight 60s linear infinite; }
+
+    @keyframes caseScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .case-scroll-left { animation: caseScroll 120s linear infinite; }
+    .case-scroll-left:hover { animation-play-state: paused; }
+    .case-scroll-right { animation: scrollRight 120s linear infinite; }
+    .case-scroll-right:hover { animation-play-state: paused; }
+
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:9999px}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const {useRef,useEffect,useState} = React;
+
+/* ── FadingVideo ── */
+function FadingVideo({src,className,style}){
+  const videoRef=useRef(null),rAFRef=useRef(null),fadingOutRef=useRef(false);
+  const FADE_MS=500,FADE_OUT_LEAD=0.55;
+  useEffect(()=>{
+    const v=videoRef.current;if(!v)return;
+    function fadeTo(t,d){
+      if(rAFRef.current)cancelAnimationFrame(rAFRef.current);
+      const s=parseFloat(v.style.opacity)||0,st=performance.now();
+      function step(n){const e=n-st,p=Math.min(e/d,1);v.style.opacity=s+(t-s)*p;if(p<1)rAFRef.current=requestAnimationFrame(step)}
+      rAFRef.current=requestAnimationFrame(step);
+    }
+    const onLoad=()=>{v.style.opacity="0";v.play().catch(()=>{});fadeTo(1,FADE_MS)};
+    const onTime=()=>{if(!fadingOutRef.current&&v.duration&&v.duration-v.currentTime<=FADE_OUT_LEAD&&v.duration-v.currentTime>0){fadingOutRef.current=true;fadeTo(0,FADE_MS)}};
+    const onEnd=()=>{v.style.opacity="0";setTimeout(()=>{v.currentTime=0;v.play().catch(()=>{});fadingOutRef.current=false;fadeTo(1,FADE_MS)},100)};
+    v.addEventListener("loadeddata",onLoad);v.addEventListener("timeupdate",onTime);v.addEventListener("ended",onEnd);
+    return()=>{if(rAFRef.current)cancelAnimationFrame(rAFRef.current);v.removeEventListener("loadeddata",onLoad);v.removeEventListener("timeupdate",onTime);v.removeEventListener("ended",onEnd)};
+  },[src]);
+  return <video ref={videoRef} src={src} autoPlay muted playsInline preload="auto" className={className} style={{opacity:0,...style}}/>;
+}
+
+/* ── useInView ── */
+function useInView(threshold=0.1){
+  const ref=useRef(null);const[visible,setVisible]=useState(false);
+  useEffect(()=>{const el=ref.current;if(!el)return;const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting){setVisible(true);obs.disconnect()}},{threshold});obs.observe(el);return()=>obs.disconnect()},[]);
+  return[ref,visible];
+}
+
+/* ── AnimFade ── */
+function AnimFade({delay=0,className="",children,...props}){
+  const[ref,visible]=useInView();
+  return <div ref={ref} className={`anim-fade ${visible?"visible":""} ${className}`} style={{transitionDelay:`${delay}s`}} {...props}>{children}</div>;
+}
+
+/* ── BlurText ── */
+function BlurText({text,className}){
+  const[ref,visible]=useInView();
+  const words=text.split(" ");
+  return(
+    <p ref={ref} className={className} style={{display:"flex",flexWrap:"wrap",justifyContent:"center",rowGap:"0.1em"}}>
+      {words.map((w,i)=>(
+        <span key={i} className="blur-word" style={{marginRight:"0.28em",animationDelay:`${(i*100)/1000}s`,animationPlayState:visible?"running":"paused",opacity:visible?undefined:0}}>{w}</span>
+      ))}
+    </p>
+  );
+}
+
+/* ── Icons ── */
+const ArrowUpRight=()=><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>;
+const PlayIcon=()=><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><polygon points="6,4 20,12 6,20"/></svg>;
+const SparkleIcon=()=><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 text-white"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>;
+const BriefcaseIcon=()=><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 text-white"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>;
+
+/* ── Navbar ── */
+function Navbar(){
+  const links=["Home","Portfolio","Services","Process","Contact"];
+  const [active, setActive] = useState("home");
+  const [pillStyle, setPillStyle] = useState({});
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      let current = "home";
+      for (const link of links) {
+        const id = link.toLowerCase();
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= window.innerHeight * 0.4) {
+            current = id;
+          }
+        }
+      }
+      setActive(current);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!navRef.current) return;
+    const activeEl = navRef.current.querySelector(`[data-link="${active}"]`);
+    if (activeEl) {
+      setPillStyle({
+        left: activeEl.offsetLeft,
+        top: activeEl.offsetTop,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight,
+      });
+    }
+  }, [active]);
+
+  return(
+    <nav className="fixed top-4 left-0 right-0 px-8 lg:px-16 z-50 flex items-center justify-between">
+      <div className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{backgroundColor: 'rgba(0,0,0,0.85)', backgroundBlendMode: 'normal', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)'}}>
+        <span className="font-heading italic text-white text-xl leading-none">G</span>
+      </div>
+      <div ref={navRef} className="hidden md:flex items-center relative liquid-glass rounded-full px-1.5 py-1.5" style={{backgroundColor: 'rgba(0,0,0,0.85)', backgroundBlendMode: 'normal', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)'}}>
+        <div className="absolute bg-white/10 rounded-full transition-all duration-300 ease-out pointer-events-none" style={pillStyle} />
+        {links.map(l=>{
+          const isActive = active === l.toLowerCase();
+          return (
+            <a key={l} href={`#${l.toLowerCase()}`} data-link={l.toLowerCase()} className={`relative z-10 px-4 py-2 text-sm font-medium font-body transition-colors ${isActive ? 'text-white' : 'text-white/50 hover:text-white'}`}>{l}</a>
+          );
+        })}
+        <button className="relative z-10 bg-white text-black rounded-full px-4 py-2 text-sm font-medium font-body whitespace-nowrap flex items-center gap-1.5 ml-1">Book Free Demo <ArrowUpRight/></button>
+      </div>
+      <div className="w-12 h-12 flex-shrink-0"/>
+    </nav>
+  );
+}
+
+/* ── Hero ── */
+function HeroSection(){
+  return(
+    <section id="home" className="relative h-screen bg-black overflow-hidden flex flex-col">
+      <FadingVideo src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4" className="absolute left-1/2 top-0 -translate-x-1/2 object-cover object-top z-0" style={{width:"120%",height:"120%"}}/>
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex-1 flex flex-col items-center justify-center pt-24 px-4 text-center">
+          <AnimFade delay={0.4} className="liquid-glass rounded-full flex items-center gap-2 pr-3 mb-8">
+            <span className="bg-white text-black px-3 py-1 text-xs font-semibold rounded-full font-body">New</span>
+            <span className="text-sm text-white/90 font-body">AI + Creativity — by Goutam Mohanty</span>
+          </AnimFade>
+
+          <BlurText text="Try Before You Pay" className="text-6xl md:text-7xl lg:text-[5.5rem] font-heading italic text-white leading-[0.8] max-w-2xl tracking-[-4px]"/>
+
+          <AnimFade delay={0.8} className="mt-4 text-sm md:text-base text-white max-w-2xl font-body font-light leading-tight">
+            I'll create a sample ad for your product using AI. If you love it, we move forward. If not, you walk away. Simple — no risk, no strings.
+          </AnimFade>
+
+          <AnimFade delay={1.1} className="flex items-center gap-6 mt-6">
+            <button className="liquid-glass-strong rounded-full px-5 py-2.5 text-sm font-medium text-white font-body flex items-center gap-2">Book Your Free Demo <ArrowUpRight/></button>
+            <button className="text-white text-sm font-medium font-body flex items-center gap-2 hover:opacity-80 transition-opacity">View Portfolio <PlayIcon/></button>
+          </AnimFade>
+
+          <AnimFade delay={1.3} className="flex items-stretch gap-4 mt-8">
+            <div className="liquid-glass rounded-[1.25rem] p-5 w-[220px] flex flex-col items-start">
+              <SparkleIcon/>
+              <span className="font-heading italic text-white text-4xl tracking-[-1px] leading-none mt-3">1.5+</span>
+              <span className="text-xs text-white font-body font-light mt-2">Years of Creative Experience</span>
+            </div>
+            <div className="liquid-glass rounded-[1.25rem] p-5 w-[220px] flex flex-col items-start">
+              <BriefcaseIcon/>
+              <span className="font-heading italic text-white text-4xl tracking-[-1px] leading-none mt-3">9+</span>
+              <span className="text-xs text-white font-body font-light mt-2">Industries Served</span>
+            </div>
+          </AnimFade>
+        </div>
+
+        <AnimFade delay={1.4} className="flex flex-col items-center gap-4 pb-8 w-full max-w-5xl mx-auto mt-4">
+          <span className="liquid-glass rounded-full px-3.5 py-1 text-xs font-medium text-white font-body">Brands I've Worked With</span>
+          <div className="liquid-glass rounded-[1.25rem] py-2 px-0 md:py-4 w-full mt-2 overflow-hidden">
+            <div className="flex items-center gap-8 md:gap-14 w-max marquee-content px-4">
+              {[
+                {src: "../brand/Group 2087328295.png", className: "h-4 md:h-6", href: "https://fyers.in/"},
+                {src: "../brand/Ivana_Logo_horizontal_1_1927c0ce-8e0d-48f9-836f-a0d0dc132982.png", className: "h-8 md:h-10", href: "https://ivanajewels.com/"},
+                {src: "../brand/labscheck_white_text.png", className: "h-7 md:h-9", href: "https://labscheck.com"},
+                {src: "../brand/livingco_text_white.png", className: "h-8 md:h-12 scale-[1.7] md:scale-[2] transform", href: "https://thelivingco.life/"},
+                {src: "../brand/modern_ayurveda_white_text.png", className: "h-10 md:h-12", href: "https://avimeeherbal.com/"},
+                {src: "../brand/smartbiz_white_clean.png", className: "h-7 md:h-9", href: "https://smartcommerce.amazon.in/smartbiz"},
+                {src: "../brand/upsurge_text_white_fixed.png", className: "h-6 md:h-8", href: "https://www.upsurge.club/"},
+                {src: "../brand/Group 2087328295.png", className: "h-4 md:h-6", href: "https://fyers.in/"},
+                {src: "../brand/Ivana_Logo_horizontal_1_1927c0ce-8e0d-48f9-836f-a0d0dc132982.png", className: "h-8 md:h-10", href: "https://ivanajewels.com/"},
+                {src: "../brand/labscheck_white_text.png", className: "h-7 md:h-9", href: "https://labscheck.com"},
+                {src: "../brand/livingco_text_white.png", className: "h-8 md:h-12 scale-[1.7] md:scale-[2] transform", href: "https://thelivingco.life/"},
+                {src: "../brand/modern_ayurveda_white_text.png", className: "h-10 md:h-12", href: "https://avimeeherbal.com/"},
+                {src: "../brand/smartbiz_white_clean.png", className: "h-7 md:h-9", href: "https://smartcommerce.amazon.in/smartbiz"},
+                {src: "../brand/upsurge_text_white_fixed.png", className: "h-6 md:h-8", href: "https://www.upsurge.club/"}
+              ].map((brand, i) => (
+                <a key={i} href={brand.href} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 flex items-center justify-center">
+                  <img src={brand.src} alt="Brand Logo" className={`${brand.className} w-auto object-contain opacity-70 hover:opacity-100 transition-all`} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </AnimFade>
+      </div>
+    </section>
+  );
+}
+
+/* ── Capabilities / Services ── */
+const cards=[
+  {
+    icon:<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white"><path d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21H5Zm1-4h12l-3.75-5-3 4L9 13l-3 4Z"/></svg>,
+    tags:["AI-Powered","Photo Realism","Brand-Matched","High Convert"],
+    title:"AI Ad Concepts",
+    body:"Custom AI-generated ad concepts — image or short video — created specifically for your product using cutting-edge AI technology."
+  },
+  {
+    icon:<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white"><path d="M4 6.47 5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.89-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4Z"/></svg>,
+    tags:["Visual Direction","Brand Identity","Target Audience","Max Impact"],
+    title:"Visual Direction",
+    body:"Tailored visual style matched to your brand identity, product aesthetics, and target audience for maximum impact."
+  },
+  {
+    icon:<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1Zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7Z"/></svg>,
+    tags:["Zero Risk","Clear Preview","No Guesswork","Try Free"],
+    title:"Try Before Pay",
+    body:"A crystal-clear idea of how your final content will look. No guesswork. No risk. Evaluate the quality before committing a single rupee."
+  }
+];
+
+function CapabilitiesSection(){
+  return(
+    <section id="services" className="relative min-h-screen bg-black overflow-hidden">
+      <FadingVideo src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_094631_d30ab262-45ee-4b7d-99f3-5d5848c8ef13.mp4" className="absolute inset-0 w-full h-full object-cover z-0"/>
+      <div className="relative z-10 px-8 md:px-16 lg:px-20 pt-24 pb-10 flex flex-col min-h-screen">
+        <AnimFade delay={0.2} className="mb-auto">
+          <p className="text-sm font-body text-white/80 mb-6">// What You Get</p>
+          <h2 className="font-heading italic text-white text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-3px]">Creativity<br/>evolved</h2>
+        </AnimFade>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+          {cards.map((c,idx)=>(
+            <AnimFade key={c.title} delay={0.4+idx*0.15} className="liquid-glass rounded-[1.25rem] p-6 min-h-[360px] flex flex-col">
+              <div className="flex items-start justify-between gap-4">
+                <div className="liquid-glass w-11 h-11 rounded-[0.75rem] flex items-center justify-center flex-shrink-0">{c.icon}</div>
+                <div className="flex flex-wrap justify-end gap-1.5 max-w-[70%]">
+                  {c.tags.map(t=><span key={t} className="liquid-glass rounded-full px-3 py-1 text-xs md:text-sm text-white/90 font-body whitespace-nowrap">{t}</span>)}
+                </div>
+              </div>
+              <div className="flex-1"/>
+              <div className="mt-6">
+                <h3 className="font-heading italic text-white text-4xl md:text-5xl tracking-[-1px] leading-none">{c.title}</h3>
+                <p className="mt-3 text-base md:text-lg text-white/90 font-body font-light leading-snug max-w-[32ch]">{c.body}</p>
+              </div>
+            </AnimFade>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 3D Carousel Portfolio ── */
+const portfolioItems=[
+  {src:"../Video/Bakery/Product Ad Generator  Turn Any Product into AI Ads  Higgsfield (1).mp4",category:"Food & Bakery",title:"Bakery Product Ad"},
+  {src:"../Video/Fashion Were/01 .mp4",category:"Fashion",title:"Fashion Wear Ad"},
+  {src:"../Video/Footwear/01.mp4",category:"Footwear",title:"Shoe Brand Ad"},
+  {src:"../Video/Gym Equipment/App Ad Generator  Turn Any App into AI Ads  Higgsfield.mp4",category:"Fitness",title:"Gym Equipment Ad"},
+  {src:"../Video/Phone Case/01.mp4",category:"Accessories",title:"Phone Case Ad"},
+  {src:"../Video/Tote Bag/01.mp4",category:"Bags",title:"Tote Bag Ad"},
+  {src:"../Video/UGC Ad serum/01.mp4",category:"Beauty & Skincare",title:"UGC Serum Ad"},
+  {src:"../Video/Watch/01.mp4",category:"Luxury",title:"Watch Brand Ad"},
+  {src:"../Video/Phone Case/02.mp4",category:"Accessories",title:"Phone Case Ad II"},
+];
+
+function Carousel3D(){
+  const[active,setActive]=useState(0);
+  const videoRefs=useRef([]);
+  const total=portfolioItems.length;
+  const dragRef=useRef({startX:0,dragging:false});
+  const viewportRef=useRef(null);
+  const wheelLock=useRef(false);
+  const goRef=useRef(null);
+
+  const navigate=(dir)=>setActive(a=>(a+dir+total)%total);
+  goRef.current=navigate;
+
+  useEffect(()=>{
+    videoRefs.current.forEach((v,i)=>{
+      if(!v)return;
+      if(i===active){v.currentTime=0;v.play().catch(()=>{});}
+      else{v.pause();v.currentTime=0;}
+    });
+  },[active]);
+
+  /* Mouse drag */
+  const onMouseDown=(e)=>{dragRef.current={startX:e.clientX,dragging:true};e.preventDefault()};
+  useEffect(()=>{
+    const onMove=(e)=>{if(!dragRef.current.dragging)return;e.preventDefault()};
+    const onUp=(e)=>{
+      if(!dragRef.current.dragging)return;
+      const dx=e.clientX-dragRef.current.startX;
+      dragRef.current.dragging=false;
+      if(Math.abs(dx)>40){dx<0?goRef.current(1):goRef.current(-1)}
+    };
+    window.addEventListener("mousemove",onMove);
+    window.addEventListener("mouseup",onUp);
+    return()=>{window.removeEventListener("mousemove",onMove);window.removeEventListener("mouseup",onUp)};
+  },[]);
+
+  /* Touch swipe */
+  const touchRef=useRef(0);
+  const onTouchStart=(e)=>{touchRef.current=e.touches[0].clientX};
+  const onTouchEnd=(e)=>{
+    const dx=e.changedTouches[0].clientX-touchRef.current;
+    if(Math.abs(dx)>40){dx<0?goRef.current(1):goRef.current(-1)}
+  };
+
+  /* Scroll wheel */
+  useEffect(()=>{
+    const el=viewportRef.current;if(!el)return;
+    const onWheel=(e)=>{
+      e.preventDefault();
+      if(wheelLock.current)return;
+      wheelLock.current=true;
+      if(e.deltaY>0||e.deltaX>0)goRef.current(1);
+      else goRef.current(-1);
+      setTimeout(()=>{wheelLock.current=false},400);
+    };
+    el.addEventListener("wheel",onWheel,{passive:false});
+    return()=>el.removeEventListener("wheel",onWheel);
+  },[]);
+
+  const getStyle=(i)=>{
+    let diff=i-active;
+    if(diff>total/2)diff-=total;
+    if(diff<-total/2)diff+=total;
+    const absDiff=Math.abs(diff);
+    if(absDiff>3)return{opacity:0,transform:"scale(0.4) translateX(0px)",zIndex:0,overlayOpacity:1};
+    const tx=diff*220;
+    const sc=1-absDiff*0.15;
+    const op=1-absDiff*0.3;
+    const ry=diff*-8;
+    const z=10-absDiff;
+    return{
+      opacity:1,
+      transform:`translateX(${tx}px) scale(${Math.max(sc,0.5)}) rotateY(${ry}deg)`,
+      zIndex:z,
+      filter:absDiff>0?`blur(${absDiff*1.5}px)`:"none",
+      overlayOpacity: 1 - Math.max(op,0)
+    };
+  };
+
+  return(
+    <div className="relative flex flex-col items-center">
+      <div ref={viewportRef} onMouseDown={onMouseDown} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+        className="relative w-full flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+        style={{perspective:"1200px",height:"520px"}}>
+        {portfolioItems.map((item,i)=>{
+          const { overlayOpacity, ...st }=getStyle(i);
+          return(
+            <div key={i} className="absolute" style={{
+              ...st,
+              width:"280px",
+              transition:"all 0.6s cubic-bezier(0.25,1,0.5,1)",
+              transformStyle:"preserve-3d",
+              pointerEvents: i === active ? "auto" : "none"
+            }}>
+              <div 
+                className="rounded-[1.25rem] overflow-hidden relative bg-black"
+                onMouseEnter={() => { if(videoRefs.current[i]) videoRefs.current[i].muted = false; }}
+                onMouseLeave={() => { if(videoRefs.current[i]) videoRefs.current[i].muted = true; }}
+              >
+                <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
+                  <video ref={el=>videoRefs.current[i]=el} src={item.src} muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover"/>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"/>
+                  <div className="absolute inset-0 bg-black pointer-events-none" style={{ opacity: overlayOpacity, transition: "opacity 0.6s cubic-bezier(0.25,1,0.5,1)" }}/>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
+                    <span className="text-[11px] text-white/60 font-body uppercase tracking-wider">{item.category}</span>
+                    <h4 className="font-heading italic text-white text-xl mt-1 leading-tight">{item.title}</h4>
+                  </div>
+                </div>
+                {/* Border overlay */}
+                <div className="absolute inset-0 rounded-[1.25rem] pointer-events-none" style={{
+                  padding: "1.5px",
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.1) 80%, rgba(255,255,255,0.6) 100%)",
+                  WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  zIndex: 20
+                }}/>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-6 mt-8">
+        <button onClick={()=>navigate(-1)} className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div className="flex items-center gap-2">
+          {portfolioItems.map((_,i)=>(
+            <button key={i} onClick={()=>setActive(i)} className={`w-2 h-2 rounded-full transition-all duration-300 ${i===active?"bg-white w-6":"bg-white/30"}`}/>
+          ))}
+        </div>
+        <button onClick={()=>navigate(1)} className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PortfolioSection(){
+  return(
+    <section id="portfolio" className="relative bg-black py-24 overflow-hidden">
+      <div className="relative z-10 px-8 md:px-16 lg:px-20">
+        <AnimFade delay={0.1} className="text-center mb-16">
+          <p className="text-sm font-body text-white/80 mb-6">// Portfolio</p>
+          <h2 className="font-heading italic text-white text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-3px] mb-4">Real AI Ads.<br/>Real Products.</h2>
+          <p className="text-sm md:text-base text-white/70 font-body font-light max-w-xl mx-auto">Browse demos across 9+ industries. Every piece was generated using AI.</p>
+        </AnimFade>
+        <AnimFade delay={0.3}>
+          <Carousel3D/>
+        </AnimFade>
+      </div>
+    </section>
+  );
+}
+
+/* ── Case Studies ── */
+const allCaseStudyImages = [
+  "../design/Design 1/01.png",
+  "../design/Design 1/02.png",
+  "../design/Design 1/03.png",
+  "../design/Design 1/04.png",
+  "../design/Design 1/05.png",
+  "../design/Design 2/Copy of 05.png",
+  "../design/Design 2/Copy of 06.png",
+  "../design/Design 2/Copy of 08.png",
+  "../design/Design 2/Copy of 09.png",
+  "../design/Design 1/01.png"
+];
+
+function CaseStudyCard({ img }) {
+  const cardRef = React.useRef(null);
+  const [style, setStyle] = React.useState({ zIndex: 10, transform: 'translate3d(0px, 0px, 0) scale(1)' });
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+    
+    const moveX = centerX - cardCenterX;
+    const moveY = centerY - cardCenterY;
+    
+    const scaleFactor = window.innerWidth < 768 ? 1.5 : 2.5;
+
+    setStyle({
+      transform: `translate3d(${moveX}px, ${moveY}px, 0) scale(${scaleFactor})`,
+      zIndex: 100
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setStyle({ transform: 'translate3d(0px, 0px, 0) scale(1)', zIndex: 10 });
+  };
+
+  return (
+    <div 
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative flex-shrink-0 w-[200px] md:w-[280px] h-[150px] md:h-[210px]"
+    >
+      <div
+        style={style}
+        className="absolute inset-0 w-full h-full rounded-[1rem] transition-all duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] pointer-events-none will-change-transform"
+      >
+        <img 
+          src={img} 
+          alt={`Design showcase`} 
+          className="absolute inset-0 w-full h-full object-cover rounded-[1rem] shadow-[0_30px_60px_rgba(0,0,0,0.9)]" 
+        />
+        <div className={`absolute inset-0 bg-black/40 pointer-events-none rounded-[1rem] transition-colors duration-500 ${isHovered ? 'bg-transparent' : ''}`} />
+      </div>
+    </div>
+  );
+}
+
+function CaseStudiesSection() {
+  return (
+    <section className="relative bg-black py-24 overflow-hidden">
+      <div className="relative z-10 px-0 md:px-8 lg:px-12">
+        <AnimFade delay={0.1} className="text-center mb-16 px-8">
+          <p className="text-sm font-body text-white/80 mb-6">// Design Gallery</p>
+          <h2 className="font-heading italic text-white text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-3px] mb-4">Design that<br/>speaks.</h2>
+          <p className="text-sm md:text-base text-white/70 font-body font-light max-w-xl mx-auto">All graphics & branding work displayed in a seamless gallery.</p>
+        </AnimFade>
+
+        <AnimFade delay={0.3} className="liquid-glass md:rounded-[1.5rem] overflow-hidden">
+          <div className="py-20 md:py-40 relative flex flex-col gap-4 md:gap-8">
+            <div className="flex items-center gap-4 md:gap-8 w-max case-scroll-left px-6 relative z-10 hover:z-50">
+              {[...allCaseStudyImages, ...allCaseStudyImages, ...allCaseStudyImages, ...allCaseStudyImages].map((img, i) => (
+                <CaseStudyCard key={`top-${i}`} img={img} />
+              ))}
+            </div>
+            <div className="flex items-center gap-4 md:gap-8 w-max case-scroll-right px-6 relative z-10 hover:z-50">
+              {[...allCaseStudyImages, ...allCaseStudyImages, ...allCaseStudyImages, ...allCaseStudyImages].reverse().map((img, i) => (
+                <CaseStudyCard key={`bottom-${i}`} img={img} />
+              ))}
+            </div>
+          </div>
+        </AnimFade>
+      </div>
+    </section>
+  );
+}
+
+/* ── How It Works ── */
+const steps=[
+  {num:"01",title:"Submit Your Product",desc:"Share your product link or website. Tell us about your brand and what you're looking for."},
+  {num:"02",title:"Get Your Demo",desc:"I create a custom AI-generated ad concept tailored to your product and brand identity."},
+  {num:"03",title:"You Decide",desc:"Love it? We move forward. Not convinced? Walk away — zero obligation, zero cost."},
+];
+
+function HowItWorksSection(){
+  return(
+    <section id="process" className="relative bg-black py-24 overflow-hidden">
+      <FadingVideo src="file:///C:/Users/user/Downloads/hf_20260509_121724_565834f8-cd68-467a-bffd-afb535612b13.mp4" className="absolute inset-0 w-full h-full object-cover z-0"/>
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black to-transparent z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none"></div>
+      <div className="relative z-10 px-8 md:px-16 lg:px-20">
+        <AnimFade delay={0.1}>
+          <p className="text-sm font-body text-white/80 mb-6">// Process</p>
+          <h2 className="font-heading italic text-white text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-3px] mb-16">How it<br/>works</h2>
+        </AnimFade>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {steps.map((s,i)=>(
+            <AnimFade key={s.num} delay={0.3+i*0.15} className="liquid-glass rounded-[1.25rem] p-8 flex flex-col">
+              <span className="font-heading italic text-white/20 text-7xl md:text-8xl leading-none">{s.num}</span>
+              <h3 className="font-heading italic text-white text-4xl md:text-5xl mt-4 tracking-[-1px] leading-none">{s.title}</h3>
+              <p className="mt-4 text-base md:text-lg text-white/80 font-body font-light leading-relaxed">{s.desc}</p>
+            </AnimFade>
+          ))}
+        </div>
+        <AnimFade delay={0.8} className="mt-16 flex justify-center">
+          <button className="liquid-glass-strong rounded-full px-8 py-3 text-base font-medium text-white font-body flex items-center gap-2">Book Your Free Demo <ArrowUpRight/></button>
+        </AnimFade>
+      </div>
+    </section>
+  );
+}
+
+/* ── Footer ── */
+function Footer(){
+  return(
+    <footer id="contact" className="relative bg-black border-t border-white/10 py-16">
+      <div className="px-8 md:px-16 lg:px-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          <div className="lg:col-span-1">
+            <span className="font-heading italic text-white text-2xl">Goutam Mohanty</span>
+            <p className="mt-3 text-sm text-white/60 font-body font-light leading-relaxed max-w-xs">Video editor & AI ad creator. Combining 1.5+ years of creative expertise with cutting-edge AI to deliver ads that convert.</p>
+          </div>
+          <div>
+            <h4 className="text-xs text-white/40 font-body uppercase tracking-wider mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              {["Services","Portfolio","Process","Contact"].map(l=><li key={l}><a href={`#${l.toLowerCase()}`} className="text-sm text-white/70 font-body hover:text-white transition-colors">{l}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-xs text-white/40 font-body uppercase tracking-wider mb-4">Industries</h4>
+            <ul className="space-y-2">
+              {["Fashion & Apparel","Food & Bakery","Beauty & Skincare","Accessories & Luxury"].map(l=><li key={l}><span className="text-sm text-white/70 font-body">{l}</span></li>)}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-xs text-white/40 font-body uppercase tracking-wider mb-4">Contact Us</h4>
+            <ul className="space-y-3">
+              <li>
+                <a href="mailto:goutammohanty438@gmail.com" className="group flex items-center gap-3 text-sm text-white/70 font-body hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70 group-hover:opacity-100 transition-opacity"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <span>goutammohanty438@gmail.com</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://wa.me/917853860024" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-3 text-sm text-white/70 font-body hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70 group-hover:opacity-100 transition-opacity"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>+91 7853860024</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/10 gap-4">
+          <span className="text-xs text-white/40 font-body">© 2026 Goutam Mohanty. All rights reserved.</span>
+          <span className="text-xs text-white/40 font-body">Powered by AI. Crafted with purpose.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ── Demo Form Section ── */
+const benefits=[
+  {icon:"🎬",title:"See Real Results",desc:"Get an actual AI-generated ad for your product, not a generic sample."},
+  {icon:"💰",title:"Zero Investment",desc:"No payment required. No credit card. No strings attached."},
+  {icon:"⚡",title:"Fast Turnaround",desc:"Your custom demo will be ready within 24-48 hours."},
+  {icon:"🎯",title:"No Obligation",desc:"If you don't love it, simply walk away. We prove our value upfront."},
+];
+const budgets=["$300–$500","$500–$1K","$1K–$2K","$2K–$3K+"];
+
+function DemoSection(){
+  const[budget,setBudget]=useState(3);
+  const[sent,setSent]=useState(false);
+  const onSubmit=(e)=>{e.preventDefault();setSent(true)};
+
+  return(
+    <section id="contact" className="relative bg-black py-24 overflow-hidden">
+      <FadingVideo src="../Video/magnific_abstract-iridescent-liqui_2994792947_chf3_prob4.mp4" className="absolute inset-0 w-full h-full object-cover z-0"/>
+      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-black to-transparent z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none"></div>
+      <div className="relative z-10 px-8 md:px-16 lg:px-20">
+        <AnimFade delay={0.1} className="text-center mb-16">
+          <p className="text-sm font-body text-white/80 mb-6">// Free Demo</p>
+          <h2 className="font-heading italic text-white text-5xl md:text-6xl lg:text-7xl leading-[0.9] tracking-[-3px] mb-4">Book Your Free Demo</h2>
+          <p className="text-sm md:text-base text-white/60 font-body font-light max-w-lg mx-auto">Submit your product link and I'll create a custom AI ad — completely free.</p>
+        </AnimFade>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+          {/* Benefits */}
+          <AnimFade delay={0.2}>
+            <h3 className="font-heading italic text-white text-2xl mb-8">Why request a demo?</h3>
+            <div className="space-y-6">
+              {benefits.map((b,i)=>(
+                <div key={i} className="liquid-glass rounded-[1rem] p-5 flex items-start gap-4">
+                  <span className="text-2xl flex-shrink-0 mt-0.5">{b.icon}</span>
+                  <div>
+                    <h4 className="text-white font-body font-semibold text-sm">{b.title}</h4>
+                    <p className="text-white/60 font-body font-light text-sm mt-1">{b.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AnimFade>
+
+          {/* Form */}
+          <AnimFade delay={0.4}>
+            {!sent?(
+            <form onSubmit={onSubmit} className="liquid-glass rounded-[1.25rem] p-8 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Your Name</label>
+                  <input type="text" placeholder="John Doe" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                </div>
+                <div>
+                  <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Email Address</label>
+                  <input type="email" placeholder="john@example.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Website / Product Link</label>
+                <input type="url" placeholder="https://your-product-page.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+              </div>
+              <div>
+                <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Brand / Product Name</label>
+                <input type="text" placeholder="Your brand name" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+              </div>
+              <div>
+                <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">What type of ad?</label>
+                <select className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body outline-none focus:border-white/30 transition-colors appearance-none" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 12px center"}}>
+                  <option value="video">Short Video Ad</option>
+                  <option value="image">Image Ad</option>
+                  <option value="both">Both (Video + Image)</option>
+                  <option value="unsure">Not sure — surprise me!</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Additional Details (Optional)</label>
+                <textarea rows="3" placeholder="Tell us about your brand style, target audience, or any specific ideas..." className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors resize-none"/>
+              </div>
+              <div className="pt-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">🎯</span>
+                  <div>
+                    <span className="text-[10px] text-white/40 font-body uppercase tracking-wider block">Budget Range</span>
+                    <span className="text-sm text-white font-body font-medium">What is your budget?</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {budgets.map((b,i)=>(
+                    <button key={i} type="button" onClick={()=>setBudget(i)} className={`rounded-full px-4 py-1.5 text-xs font-body transition-all ${i===budget?"bg-white/20 text-white border border-white/30":"bg-white/5 text-white/60 border border-white/10 hover:border-white/20"}`}>
+                      {b}<span className="text-white/40 ml-0.5">/mo</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-[0.75rem] py-3 text-sm font-body font-semibold transition-colors flex items-center justify-center gap-2 mt-2">
+                👉 Request My Free Demo
+              </button>
+              <p className="text-[11px] text-white/30 font-body text-center">🔒 Your information is safe. We'll only use it to create your demo.</p>
+            </form>
+            ):(
+            <div className="liquid-glass rounded-[1.25rem] p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <span className="text-5xl mb-4">🎉</span>
+              <h3 className="font-heading italic text-white text-3xl mb-3">You're All Set!</h3>
+              <p className="text-white/70 font-body text-sm mb-6">Your demo request has been received successfully.</p>
+              <div className="liquid-glass rounded-[1rem] p-4 flex items-center gap-3 mb-4">
+                <span className="text-2xl">🎬</span>
+                <p className="text-white font-body text-sm font-medium text-left">Your custom demo video will be delivered within 1 business day.</p>
+              </div>
+              <p className="text-white/50 font-body text-xs max-w-sm">I'll personally review your product link, craft a tailored AI ad concept, and send it straight to your inbox.</p>
+            </div>
+            )}
+          </AnimFade>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── App ── */
+function App(){return <><Navbar/><HeroSection/><PortfolioSection/><CaseStudiesSection/><CapabilitiesSection/><HowItWorksSection/><DemoSection/><Footer/></>}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
