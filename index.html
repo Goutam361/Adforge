@@ -670,7 +670,20 @@ const budgets=["$300–$500","$500–$1K","$1K–$2K","$2K–$3K+"];
 function DemoSection(){
   const[budget,setBudget]=useState(3);
   const[sent,setSent]=useState(false);
-  const onSubmit=(e)=>{e.preventDefault();setSent(true)};
+  const[loading,setLoading]=useState(false);
+  const onSubmit=(e)=>{
+    e.preventDefault();
+    setLoading(true);
+    const formData=new FormData(e.target);
+    fetch("https://formsubmit.co/ajax/goutammohanty438@gmail.com",{
+      method:"POST",
+      headers:{'Accept':'application/json'},
+      body:formData
+    })
+    .then(r=>r.json())
+    .then(()=>{setSent(true);setLoading(false);})
+    .catch(()=>{setSent(true);setLoading(false);});
+  };
 
   return(
     <section id="contact" className="relative bg-black py-24 overflow-hidden">
@@ -708,24 +721,24 @@ function DemoSection(){
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Your Name</label>
-                  <input type="text" placeholder="John Doe" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                  <input type="text" name="name" placeholder="John Doe" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
                 </div>
                 <div>
                   <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Email Address</label>
-                  <input type="email" placeholder="john@example.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                  <input type="email" name="email" placeholder="john@example.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
                 </div>
               </div>
               <div>
                 <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Website / Product Link</label>
-                <input type="url" placeholder="https://your-product-page.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                <input type="url" name="website" placeholder="https://your-product-page.com" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
               </div>
               <div>
                 <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Brand / Product Name</label>
-                <input type="text" placeholder="Your brand name" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
+                <input type="text" name="brand" placeholder="Your brand name" required className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors"/>
               </div>
               <div>
                 <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">What type of ad?</label>
-                <select className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body outline-none focus:border-white/30 transition-colors appearance-none" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 12px center"}}>
+                <select name="ad_type" className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body outline-none focus:border-white/30 transition-colors appearance-none" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 12px center"}}>
                   <option value="video">Short Video Ad</option>
                   <option value="image">Image Ad</option>
                   <option value="both">Both (Video + Image)</option>
@@ -734,9 +747,10 @@ function DemoSection(){
               </div>
               <div>
                 <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Additional Details (Optional)</label>
-                <textarea rows="3" placeholder="Tell us about your brand style, target audience, or any specific ideas..." className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors resize-none"/>
+                <textarea name="details" rows="3" placeholder="Tell us about your brand style, target audience, or any specific ideas..." className="w-full bg-white/5 border border-white/10 rounded-[0.75rem] px-4 py-2.5 text-sm text-white font-body placeholder-white/30 outline-none focus:border-white/30 transition-colors resize-none"/>
               </div>
               <div className="pt-2">
+                <input type="hidden" name="budget" value={budgets[budget]} />
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🎯</span>
                   <div>
@@ -752,8 +766,8 @@ function DemoSection(){
                   ))}
                 </div>
               </div>
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-[0.75rem] py-3 text-sm font-body font-semibold transition-colors flex items-center justify-center gap-2 mt-2">
-                👉 Request My Free Demo
+              <button type="submit" disabled={loading} className={`w-full bg-blue-600 hover:bg-blue-500 text-white rounded-[0.75rem] py-3 text-sm font-body font-semibold transition-colors flex items-center justify-center gap-2 mt-2 ${loading ? 'opacity-70 cursor-wait' : ''}`}>
+                {loading ? "Sending..." : "👉 Request My Free Demo"}
               </button>
               <p className="text-[11px] text-white/30 font-body text-center">🔒 Your information is safe. We'll only use it to create your demo.</p>
             </form>
