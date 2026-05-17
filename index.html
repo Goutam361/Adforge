@@ -669,21 +669,6 @@ const budgets=["$300–$500","$500–$1K","$1K–$2K","$2K–$3K+"];
 
 function DemoSection(){
   const[budget,setBudget]=useState(3);
-  const[sent,setSent]=useState(false);
-  const[loading,setLoading]=useState(false);
-  const onSubmit=(e)=>{
-    e.preventDefault();
-    setLoading(true);
-    const formData=new FormData(e.target);
-    fetch("https://formsubmit.co/ajax/goutammohanty438@gmail.com",{
-      method:"POST",
-      headers:{'Accept':'application/json'},
-      body:formData
-    })
-    .then(r=>r.json())
-    .then(()=>{setSent(true);setLoading(false);})
-    .catch(()=>{setSent(true);setLoading(false);});
-  };
 
   return(
     <section id="contact" className="relative bg-black py-24 overflow-hidden">
@@ -716,8 +701,9 @@ function DemoSection(){
 
           {/* Form */}
           <AnimFade delay={0.4}>
-            {!sent?(
-            <form onSubmit={onSubmit} className="liquid-glass rounded-[1.25rem] p-8 space-y-5">
+            <form action="https://formsubmit.co/goutammohanty438@gmail.com" method="POST" className="liquid-glass rounded-[1.25rem] p-8 space-y-5">
+              <input type="hidden" name="_next" value="https://goutam361.github.io/Demo-website/" />
+              <input type="hidden" name="_captcha" value="false" />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[11px] text-white/50 font-body uppercase tracking-wider mb-1.5 block">Your Name</label>
@@ -766,23 +752,11 @@ function DemoSection(){
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={loading} className={`w-full bg-blue-600 hover:bg-blue-500 text-white rounded-[0.75rem] py-3 text-sm font-body font-semibold transition-colors flex items-center justify-center gap-2 mt-2 ${loading ? 'opacity-70 cursor-wait' : ''}`}>
-                {loading ? "Sending..." : "👉 Request My Free Demo"}
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-[0.75rem] py-3 text-sm font-body font-semibold transition-colors flex items-center justify-center gap-2 mt-2">
+                👉 Request My Free Demo
               </button>
               <p className="text-[11px] text-white/30 font-body text-center">🔒 Your information is safe. We'll only use it to create your demo.</p>
             </form>
-            ):(
-            <div className="liquid-glass rounded-[1.25rem] p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-              <span className="text-5xl mb-4">🎉</span>
-              <h3 className="font-heading italic text-white text-3xl mb-3">You're All Set!</h3>
-              <p className="text-white/70 font-body text-sm mb-6">Your demo request has been received successfully.</p>
-              <div className="liquid-glass rounded-[1rem] p-4 flex items-center gap-3 mb-4">
-                <span className="text-2xl">🎬</span>
-                <p className="text-white font-body text-sm font-medium text-left">Your custom demo video will be delivered within 1 business day.</p>
-              </div>
-              <p className="text-white/50 font-body text-xs max-w-sm">I'll personally review your product link, craft a tailored AI ad concept, and send it straight to your inbox.</p>
-            </div>
-            )}
           </AnimFade>
         </div>
       </div>
