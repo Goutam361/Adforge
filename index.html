@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
   <title>Goutam Mohanty | AI-Powered Ad Creation | Try Before You Pay</title>
   <meta name="description" content="Goutam Mohanty — Video editor & AI ad creator. Get a free AI-generated ad demo for your brand. See real results before you invest." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
@@ -28,8 +28,8 @@
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth;scroll-padding-top:6rem;}
-    body{background:#000;font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    html{scroll-behavior:smooth;scroll-padding-top:6rem;height:100%;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+    body{background:#000;font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;overscroll-behavior-y:none;min-height:100%;position:relative}
 
     .liquid-glass{background:rgba(255,255,255,0.01);background-blend-mode:luminosity;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;box-shadow:inset 0 1px 1px rgba(255,255,255,0.1);position:relative;overflow:hidden}
     .liquid-glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;background:linear-gradient(180deg,rgba(255,255,255,0.45) 0%,rgba(255,255,255,0.15) 20%,rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%,rgba(255,255,255,0.15) 80%,rgba(255,255,255,0.45) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
@@ -65,6 +65,12 @@
     ::-webkit-scrollbar{width:6px}
     ::-webkit-scrollbar-track{background:transparent}
     ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:9999px}
+
+    /* Mobile: reduce GPU-heavy effects to prevent browser tab crashes/reloads */
+    @media(max-width:768px){
+      .liquid-glass{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+      .liquid-glass-strong{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    }
   </style>
 </head>
 <body>
@@ -190,8 +196,8 @@ function Navbar(){
 /* ── Hero ── */
 function HeroSection(){
   return(
-    <section id="home" className="relative h-screen bg-black overflow-hidden flex flex-col">
-      <FadingVideo src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4" className="absolute left-1/2 top-0 -translate-x-1/2 object-cover object-top z-0" style={{width:"120%",height:"120%"}}/>
+    <section id="home" className="relative h-screen bg-black overflow-hidden flex flex-col" style={{touchAction:'pan-y'}}>
+      <FadingVideo src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4" className="absolute inset-0 w-full h-full object-cover object-top z-0"/>
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex-1 flex flex-col items-center justify-center pt-24 px-4 text-center">
           <AnimFade delay={0.4} className="liquid-glass rounded-full flex items-center gap-2 pr-3 mb-8">
@@ -368,6 +374,9 @@ function Carousel3D(){
   /* Scroll wheel */
   useEffect(()=>{
     const el=viewportRef.current;if(!el)return;
+    /* Only capture wheel on desktop — mobile uses touch swipe instead */
+    const isMobile='ontouchstart' in window || navigator.maxTouchPoints>0;
+    if(isMobile)return;
     const onWheel=(e)=>{
       e.preventDefault();
       if(wheelLock.current)return;
